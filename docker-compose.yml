@@ -1,0 +1,45 @@
+# ═══════════════════════════════════════════════════════════════
+# Telegram Booking Bot — Docker Compose
+# ═══════════════════════════════════════════════════════════════
+# Usage:
+#   docker-compose up -d          # Start all services
+#   docker-compose logs -f bot    # Follow bot logs
+#   docker-compose down           # Stop all services
+# ═══════════════════════════════════════════════════════════════
+
+services:
+  # ─── PostgreSQL Database ───────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: booking_db
+    environment:
+      POSTGRES_DB: booking_db
+      POSTGRES_USER: booking_user
+      POSTGRES_PASSWORD: booking_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U booking_user -d booking_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ─── Telegram Bot ──────────────────────────────────────────
+  bot:
+    build: .
+    container_name: booking_bot
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      DATABASE_URL: postgresql+asyncpg://booking_user:booking_pass@postgres:5432/booking_db
+      ADMIN_TELEGRAM_ID: ${ADMIN_TELEGRAM_ID}
+      BUSINESS_NAME: ${BUSINESS_NAME:-Demo Barbershop}
+      TIMEZONE: ${TIMEZONE:-Asia/Tashkent}
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
