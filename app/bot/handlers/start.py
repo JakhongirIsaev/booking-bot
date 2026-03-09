@@ -27,7 +27,6 @@ from app.bot.states import RegistrationStates
 from app.bot.keyboards.client_kb import (
     main_menu_keyboard,
     language_keyboard,
-    skip_phone_keyboard,
 )
 
 router = Router()
@@ -111,7 +110,6 @@ async def reg_name_entered(message: Message, state: FSMContext) -> None:
     await state.set_state(RegistrationStates.entering_phone)
     await message.answer(
         t("ask_phone", lang),
-        reply_markup=skip_phone_keyboard(lang),
         parse_mode="HTML",
     )
 
@@ -126,6 +124,12 @@ async def reg_phone_entered(message: Message, state: FSMContext) -> None:
     lang = data.get("language", "ru")
     name = data.get("name", "User")
 
+    # Validate phone — must be at least 9 digits
+    digits_only = ''.join(c for c in phone if c.isdigit())
+    if len(digits_only) < 9:
+        await message.answer(t("ask_phone", lang), parse_mode="HTML")
+        return
+
     # Save phone to DB
     async with get_session() as session:
         await update_client_phone(session, message.from_user.id, phone)
@@ -138,20 +142,7 @@ async def reg_phone_entered(message: Message, state: FSMContext) -> None:
     )
 
 
-@router.callback_query(RegistrationStates.entering_phone, F.data == "skip_phone")
-async def reg_skip_phone(callback: CallbackQuery, state: FSMContext) -> None:
-    """User skipped phone — complete registration."""
-    data = await state.get_data()
-    lang = data.get("language", "ru")
-    name = data.get("name", "User")
 
-    await state.clear()
-    await callback.message.edit_text(
-        t("registration_complete", lang, business=settings.business_name, name=name),
-        reply_markup=main_menu_keyboard(lang),
-        parse_mode="HTML",
-    )
-    await callback.answer()
 
 
 # ─── Main Menu ──────────────────────────────────────────────────────

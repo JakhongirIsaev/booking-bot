@@ -1,8 +1,8 @@
 """
 Service model — represents a service offered by the business.
 
-Examples: Haircut, Beard Trim, Haircut + Beard.
-Each service has a duration (used for slot calculation) and a price.
+Supports localized names (Russian, Uzbek, English).
+Each service has a duration (for slot calculation) and a price.
 """
 
 import uuid
@@ -24,7 +24,11 @@ class Service(Base):
     business_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("businesses.id"), nullable=False
     )
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    # Localized names
+    name_ru: Mapped[str] = mapped_column(String(255), nullable=False)
+    name_uz: Mapped[str] = mapped_column(String(255), nullable=False)
+    name_en: Mapped[str] = mapped_column(String(255), nullable=False)
+
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
     price: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
@@ -37,5 +41,9 @@ class Service(Base):
     business = relationship("Business", back_populates="services")
     bookings = relationship("Booking", back_populates="service", lazy="selectin")
 
+    def get_name(self, lang: str = "ru") -> str:
+        """Get service name in the specified language."""
+        return getattr(self, f"name_{lang}", self.name_ru)
+
     def __repr__(self) -> str:
-        return f"<Service(id={self.id}, name='{self.name}', {self.duration_minutes}min, {self.price})>"
+        return f"<Service(id={self.id}, name='{self.name_ru}', {self.duration_minutes}min)>"

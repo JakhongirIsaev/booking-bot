@@ -1,8 +1,8 @@
 """
-Business model — represents a barbershop or service business.
+Business model — represents a service business (barbershop, nail salon, etc.).
 
-Each business has one owner identified by their Telegram user ID.
-A business contains staff, services, and bookings.
+Each business has a category, location, and optional owner.
+Contains staff, services, and bookings.
 """
 
 import uuid
@@ -22,7 +22,9 @@ class Business(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    telegram_owner_id: Mapped[int] = mapped_column(BigInteger, nullable=False, unique=True)
+    category: Mapped[str] = mapped_column(String(100), nullable=False, default="barbershop")
+    address: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    telegram_owner_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -34,4 +36,4 @@ class Business(Base):
     bookings = relationship("Booking", back_populates="business", lazy="selectin")
 
     def __repr__(self) -> str:
-        return f"<Business(id={self.id}, name='{self.name}')>"
+        return f"<Business(id={self.id}, name='{self.name}', cat='{self.category}')>"

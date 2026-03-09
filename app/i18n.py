@@ -31,9 +31,9 @@ TRANSLATIONS = {
         "en": "👋 Welcome!\n\nPlease enter your name:",
     },
     "ask_phone": {
-        "ru": "📱 Введите ваш номер телефона\n(или нажмите «Пропустить»):",
-        "uz": "📱 Telefon raqamingizni kiriting\n(yoki «O'tkazib yuborish» tugmasini bosing):",
-        "en": "📱 Enter your phone number\n(or press «Skip»):",
+        "ru": "📱 Введите ваш номер телефона:",
+        "uz": "📱 Telefon raqamingizni kiriting:",
+        "en": "📱 Enter your phone number:",
     },
     "skip": {
         "ru": "⏭ Пропустить",
@@ -66,6 +66,45 @@ TRANSLATIONS = {
         "ru": "🌐 Сменить язык",
         "uz": "🌐 Tilni o'zgartirish",
         "en": "🌐 Change Language",
+    },
+
+    # ─── Categories ──────────────────────────────────────────────
+    "choose_category": {
+        "ru": "🏢 <b>Выберите тип заведения:</b>",
+        "uz": "🏢 <b>Muassasa turini tanlang:</b>",
+        "en": "🏢 <b>Choose a business type:</b>",
+    },
+    "cat_barbershop": {
+        "ru": "💈 Барбершоп",
+        "uz": "💈 Barbershop",
+        "en": "💈 Barbershop",
+    },
+    "cat_nails": {
+        "ru": "💅 Маникюр / Педикюр",
+        "uz": "💅 Manikur / Pedikur",
+        "en": "💅 Nails",
+    },
+
+    # ─── Shop listing ────────────────────────────────────────────
+    "choose_shop": {
+        "ru": "📍 <b>Выберите заведение:</b>",
+        "uz": "📍 <b>Muassasani tanlang:</b>",
+        "en": "📍 <b>Choose a shop:</b>",
+    },
+    "no_shops": {
+        "ru": "❌ Заведений в этой категории пока нет.",
+        "uz": "❌ Bu kategoriyada muassasalar yo'q.",
+        "en": "❌ No shops in this category yet.",
+    },
+    "shop_info": {
+        "ru": "🏢 <b>{name}</b>\n{address}\n📞 {phone}\n\nНажмите кнопку ниже, чтобы записаться:",
+        "uz": "🏢 <b>{name}</b>\n{address}\n📞 {phone}\n\nYozilish uchun quyidagi tugmani bosing:",
+        "en": "🏢 <b>{name}</b>\n{address}\n📞 {phone}\n\nPress the button below to book:",
+    },
+    "btn_book_here": {
+        "ru": "📅 Записаться сюда",
+        "uz": "📅 Bu yerga yozilish",
+        "en": "📅 Book Here",
     },
 
     # ─── Booking flow ────────────────────────────────────────────
