@@ -83,6 +83,9 @@ async def main() -> None:
 
     logger.info("🔄 Starting long-polling...")
 
+    # Clear stale sessions to avoid TelegramConflictError
+    await bot.delete_webhook(drop_pending_updates=True)
+
     # Start polling — the bot will listen for updates from Telegram
     await dp.start_polling(bot)
 

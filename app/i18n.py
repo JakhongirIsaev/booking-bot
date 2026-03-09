@@ -399,6 +399,27 @@ TRANSLATIONS = {
         "uz": "🔔 **Yangi yozuv!**\n\n📅 {date}\n🕐 {time}\n👤 Mijoz: {client}\n📞 Telefon: {phone}\n💈 Xizmat: {service}",
         "en": "🔔 **New booking!**\n\n📅 {date}\n🕐 {time}\n👤 Client: {client}\n📞 Phone: {phone}\n💈 Service: {service}",
     },
+    "owner_bookings_today": {
+        "ru": "📋 **Записи на сегодня ({date}):**\n\n",
+        "uz": "📋 **Bugungi yozuvlar ({date}):**\n\n",
+        "en": "📋 **Today's Bookings ({date}):**\n\n",
+    },
+    "owner_bookings_upcoming": {
+        "ru": "📋 **Ближайшие записи:**\n\n",
+        "uz": "📋 **Kelgusi yozuvlar:**\n\n",
+        "en": "📋 **Upcoming Bookings:**\n\n",
+    },
+    "no_bookings_owner": {
+        "ru": "📋 Записей пока нет.",
+        "uz": "📋 Hozircha yozuvlar yo'q.",
+        "en": "📋 No bookings yet.",
+    },
+    "btn_today_bookings": {
+        "ru": "📅 Записи на сегодня", "uz": "📅 Bugungi yozuvlar", "en": "📅 Today's Bookings",
+    },
+    "btn_upcoming_bookings": {
+        "ru": "🔜 Ближайшие записи", "uz": "🔜 Kelgusi yozuvlar", "en": "🔜 Upcoming Bookings",
+    },
 }
 
 DEFAULT_LANG = "ru"

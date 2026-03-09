@@ -10,6 +10,7 @@ from app.config.settings import settings
 from app.database.session import get_session
 from app.services.staff_service import get_staff_by_telegram_id, link_telegram_account
 from app.bot_business.keyboards.biz_kb import owner_main_menu, staff_main_menu, lang_picker_kb
+from app.bot_business.handlers.owner import _get_owner_lang, set_owner_lang
 from app.i18n import t
 
 router = Router()
@@ -22,7 +23,7 @@ async def cmd_start(message: Message) -> None:
 
     # 1. Check if Owner
     if user_id == settings.admin_telegram_id:
-        lang = "ru" # Defaulting owner to RU
+        lang = _get_owner_lang(user_id)
         await message.answer(
             t("owner_welcome", lang),
             reply_markup=owner_main_menu(lang),
@@ -41,10 +42,10 @@ async def cmd_start(message: Message) -> None:
         )
         return
 
-    # 3. Unlinked user
+    # 3. Unlinked user — show language picker first, then unlinked message
     await message.answer(
-        t("unlinked_msg", "ru"),
-        parse_mode="Markdown",
+        "🌐 Выберите язык / Tilni tanlang / Choose your language:",
+        reply_markup=lang_picker_kb(),
     )
 
 
@@ -74,7 +75,7 @@ async def cmd_link(message: Message) -> None:
     )
 
 
-# ─── Language Change for Staff ──────────────────────────────────────
+# ─── Language Change for Staff & Owner ──────────────────────────────
 
 @router.callback_query(F.data == "biz_lang_picker")
 async def biz_change_language_picker(callback: CallbackQuery) -> None:
@@ -90,6 +91,17 @@ async def biz_set_language(callback: CallbackQuery) -> None:
     lang = callback.data.split(":")[1]
     user_id = callback.from_user.id
     
+    # Check if Owner
+    if user_id == settings.admin_telegram_id:
+        set_owner_lang(user_id, lang)
+        await callback.message.edit_text(
+            t("owner_welcome", lang),
+            reply_markup=owner_main_menu(lang),
+        )
+        await callback.answer()
+        return
+    
+    # Check if Staff
     async with get_session() as session:
         staff = await get_staff_by_telegram_id(session, user_id)
         if staff:
@@ -101,6 +113,10 @@ async def biz_set_language(callback: CallbackQuery) -> None:
                 reply_markup=staff_main_menu(lang),
             )
         else:
-            await callback.message.edit_text("You are not linked to a staff profile.")
+            # Unlinked user who just chose language
+            await callback.message.edit_text(
+                t("unlinked_msg", lang),
+                parse_mode="Markdown",
+            )
             
     await callback.answer()

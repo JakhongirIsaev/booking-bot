@@ -57,6 +57,7 @@ async def main() -> None:
     dp.include_router(staff_router)
 
     logger.info("🔄 Starting long-polling for Business Bot...")
+    await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 

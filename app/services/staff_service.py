@@ -65,7 +65,7 @@ async def get_staff_daily_bookings(session: AsyncSession, staff_id: str, target_
             Booking.start_time <= end_of_day,
             Booking.status != "cancelled"
         )
-        .options(selectinload(Booking.service))
+        .options(selectinload(Booking.service), selectinload(Booking.client))
         .order_by(Booking.start_time)
     )
     return list(result.scalars().all())

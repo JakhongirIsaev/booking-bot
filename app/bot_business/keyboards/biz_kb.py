@@ -13,6 +13,16 @@ def owner_main_menu(lang: str = "ru") -> InlineKeyboardMarkup:
     builder.row(InlineKeyboardButton(text=t("btn_my_shops", lang), callback_data="owner:shops"))
     builder.row(InlineKeyboardButton(text=t("btn_my_staff", lang), callback_data="owner:staff"))
     builder.row(InlineKeyboardButton(text=t("btn_all_bookings", lang), callback_data="owner:bookings"))
+    builder.row(InlineKeyboardButton(text=t("btn_change_lang", lang), callback_data="biz_lang_picker"))
+    return builder.as_markup()
+
+
+def owner_bookings_submenu(lang: str = "ru") -> InlineKeyboardMarkup:
+    """Submenu for viewing bookings."""
+    builder = InlineKeyboardBuilder()
+    builder.row(InlineKeyboardButton(text=t("btn_today_bookings", lang), callback_data="owner:bookings_today"))
+    builder.row(InlineKeyboardButton(text=t("btn_upcoming_bookings", lang), callback_data="owner:bookings_upcoming"))
+    builder.row(InlineKeyboardButton(text=t("btn_back_menu", lang), callback_data="owner:main_menu"))
     return builder.as_markup()
 
 
