@@ -14,6 +14,7 @@ from app.models.business import Business
 from app.models.staff import Staff
 from app.services.staff_service import generate_link_code
 from app.bot_business.keyboards.biz_kb import owner_main_menu, owner_staff_list, back_to_owner_menu
+from app.i18n import t
 
 router = Router()
 
@@ -26,9 +27,10 @@ def is_owner(user_id: int, admin_id: int) -> bool:
 @router.callback_query(F.data == "owner:main_menu")
 async def back_to_main(callback: CallbackQuery) -> None:
     """Return to owner main menu."""
+    lang = "ru"
     await callback.message.edit_text(
-        "👋 Welcome Owner!\n\nUse the menu below to manage your businesses:",
-        reply_markup=owner_main_menu(),
+        t("owner_welcome", lang),
+        reply_markup=owner_main_menu(lang),
     )
     await callback.answer()
 
@@ -41,6 +43,7 @@ async def view_shops(callback: CallbackQuery) -> None:
         await callback.answer("Unauthorized", show_alert=True)
         return
 
+    lang = "ru"
     async with get_session() as session:
         result = await session.execute(
             select(Business)
@@ -50,14 +53,14 @@ async def view_shops(callback: CallbackQuery) -> None:
         shops = result.scalars().all()
 
     if not shops:
-        await callback.message.edit_text("You don't have any shops yet.", reply_markup=back_to_owner_menu())
+        await callback.message.edit_text(t("no_shops_owner", lang), reply_markup=back_to_owner_menu(lang))
         return
 
-    text = "🏢 **Your Shops:**\n\n"
+    text = t("your_shops_title", lang)
     for s in shops:
         text += f"• **{s.name}** ({s.category})\n  {s.address}\n\n"
 
-    await callback.message.edit_text(text, reply_markup=back_to_owner_menu(), parse_mode="Markdown")
+    await callback.message.edit_text(text, reply_markup=back_to_owner_menu(lang), parse_mode="Markdown")
     await callback.answer()
 
 
@@ -69,6 +72,7 @@ async def view_staff(callback: CallbackQuery) -> None:
         await callback.answer("Unauthorized", show_alert=True)
         return
 
+    lang = "ru"
     async with get_session() as session:
         # Get staff for all businesses owned by this admin
         result = await session.execute(
@@ -81,12 +85,12 @@ async def view_staff(callback: CallbackQuery) -> None:
         staff_list = result.scalars().all()
 
     if not staff_list:
-        await callback.message.edit_text("You don't have any staff yet.", reply_markup=back_to_owner_menu())
+        await callback.message.edit_text(t("no_staff_owner", lang), reply_markup=back_to_owner_menu(lang))
         return
 
     await callback.message.edit_text(
-        "👥 **Your Staff**\n\nTap a staff member to generate a Telegram completely link code for them.",
-        reply_markup=owner_staff_list(staff_list),
+        t("your_staff_title", lang),
+        reply_markup=owner_staff_list(staff_list, lang),
         parse_mode="Markdown",
     )
     await callback.answer()
@@ -96,6 +100,7 @@ async def view_staff(callback: CallbackQuery) -> None:
 async def generate_staff_link(callback: CallbackQuery) -> None:
     """Generate and display a binding code for a specific staff member."""
     staff_id = callback.data.split(":")[2]
+    lang = "ru"
     
     async with get_session() as session:
         code = await generate_link_code(session, staff_id)
@@ -108,11 +113,8 @@ async def generate_staff_link(callback: CallbackQuery) -> None:
         return
 
     await callback.message.edit_text(
-        f"🔗 **Staff Link Code for {staff.name}**\n\n"
-        f"Send them this code so they can link their Telegram account:\n\n"
-        f"`{code}`\n\n"
-        f"They should open this bot and send:\n`/link {code}`",
-        reply_markup=back_to_owner_menu(),
+        t("staff_link_code", lang, name=staff.name, code=code),
+        reply_markup=back_to_owner_menu(lang),
         parse_mode="Markdown",
     )
     await callback.answer()

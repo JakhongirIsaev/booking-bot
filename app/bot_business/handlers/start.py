@@ -1,20 +1,16 @@
 """
 Start handler for Business Bot.
-
-Determines user role:
-1. Owner (telegram_id matches settings.admin_telegram_id)
-2. Staff (telegram_id linked in staff table)
-3. Unlinked (prompts to enter /link <code)
 """
 
 from aiogram import Router, F
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
 from app.config.settings import settings
 from app.database.session import get_session
 from app.services.staff_service import get_staff_by_telegram_id, link_telegram_account
-from app.bot_business.keyboards.biz_kb import owner_main_menu, staff_main_menu
+from app.bot_business.keyboards.biz_kb import owner_main_menu, staff_main_menu, lang_picker_kb
+from app.i18n import t
 
 router = Router()
 
@@ -26,9 +22,10 @@ async def cmd_start(message: Message) -> None:
 
     # 1. Check if Owner
     if user_id == settings.admin_telegram_id:
+        lang = "ru" # Defaulting owner to RU
         await message.answer(
-            f"👋 Welcome Owner!\n\nUse the menu below to manage your businesses:",
-            reply_markup=owner_main_menu(),
+            t("owner_welcome", lang),
+            reply_markup=owner_main_menu(lang),
         )
         return
 
@@ -37,18 +34,16 @@ async def cmd_start(message: Message) -> None:
         staff = await get_staff_by_telegram_id(session, user_id)
 
     if staff:
+        lang = staff.language
         await message.answer(
-            f"💈 Welcome back, {staff.name}!\n\nHere's your staff panel:",
-            reply_markup=staff_main_menu(),
+            t("staff_welcome", lang, name=staff.name),
+            reply_markup=staff_main_menu(lang),
         )
         return
 
     # 3. Unlinked user
     await message.answer(
-        "👋 Welcome to the Staff Bot!\n\n"
-        "It looks like your account is not linked to a staff profile yet.\n\n"
-        "To link your account, ask your owner for a link code and send it like this:\n"
-        "`/link BARBER-1234`",
+        t("unlinked_msg", "ru"),
         parse_mode="Markdown",
     )
 
@@ -58,7 +53,7 @@ async def cmd_link(message: Message) -> None:
     """Link a staff profile using a code."""
     args = message.text.split(" ")
     if len(args) < 2:
-        await message.answer("❌ Please provide a code. Example: `/link BARBER-1234`", parse_mode="Markdown")
+        await message.answer(t("link_no_code", "ru"), parse_mode="Markdown")
         return
 
     code = args[1].strip().upper()
@@ -68,11 +63,44 @@ async def cmd_link(message: Message) -> None:
         staff = await link_telegram_account(session, code, user_id)
 
     if not staff:
-        await message.answer("❌ Invalid or expired link code.")
+        await message.answer(t("link_invalid", "ru"))
         return
 
+    lang = staff.language
     await message.answer(
-        f"✅ Successfully linked to **{staff.name}**!\n\nWelcome to your staff panel.",
-        reply_markup=staff_main_menu(),
+        t("link_success", lang, name=staff.name),
+        reply_markup=staff_main_menu(lang),
         parse_mode="Markdown",
     )
+
+
+# ─── Language Change for Staff ──────────────────────────────────────
+
+@router.callback_query(F.data == "biz_lang_picker")
+async def biz_change_language_picker(callback: CallbackQuery) -> None:
+    await callback.message.edit_text(
+        "🌐 Выберите язык / Tilni tanlang / Choose your language:",
+        reply_markup=lang_picker_kb(),
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("biz_lang:"))
+async def biz_set_language(callback: CallbackQuery) -> None:
+    lang = callback.data.split(":")[1]
+    user_id = callback.from_user.id
+    
+    async with get_session() as session:
+        staff = await get_staff_by_telegram_id(session, user_id)
+        if staff:
+            staff.language = lang
+            await session.commit()
+            
+            await callback.message.edit_text(
+                t("staff_welcome", lang, name=staff.name),
+                reply_markup=staff_main_menu(lang),
+            )
+        else:
+            await callback.message.edit_text("You are not linked to a staff profile.")
+            
+    await callback.answer()

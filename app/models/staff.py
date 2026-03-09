@@ -27,6 +27,7 @@ class Staff(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     telegram_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     link_code: Mapped[str | None] = mapped_column(String(20), nullable=True, unique=True)
+    language: Mapped[str] = mapped_column(String(2), default="ru")
     role: Mapped[str] = mapped_column(String(100), default="barber")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(

@@ -478,6 +478,29 @@ async def confirm_booking(callback: CallbackQuery, state: FSMContext) -> None:
           business=biz_name),
         reply_markup=main_menu_keyboard(lang), parse_mode="HTML",
     )
+
+    # ─── Send Notification to Staff ─────────────────────────────────
+    from aiogram import Bot
+    if staff and staff.telegram_id and settings.business_bot_token:
+        # Create a temporary bot instance to send the notification
+        biz_bot = Bot(token=settings.business_bot_token)
+        import logging
+        try:
+            staff_lang = staff.language
+            notify_text = t(
+                "new_booking_notify", staff_lang,
+                date=start_time.strftime("%d.%m.%Y"),
+                time=start_time.strftime("%H:%M"),
+                client=client.name,
+                phone=client.phone or "—",
+                service=service.get_name(staff_lang) if service else "—"
+            )
+            await biz_bot.send_message(chat_id=staff.telegram_id, text=notify_text, parse_mode="Markdown")
+            logging.getLogger(__name__).info(f"Notification sent to staff {staff.telegram_id}")
+        except Exception as e:
+            logging.getLogger(__name__).error(f"Failed to notify staff {staff.id}: {e}")
+        finally:
+            await biz_bot.session.close()
     await state.clear()
     await callback.answer()
 
