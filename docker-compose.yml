@@ -26,19 +26,34 @@ services:
       timeout: 5s
       retries: 5
 
-  # ─── Telegram Bot ──────────────────────────────────────────
-  bot:
+  # ─── Client Bot ──────────────────────────────────────────────
+  bot_client:
     build: .
-    container_name: booking_bot
+    container_name: booking_client_bot
+    command: python main_client.py
     depends_on:
       postgres:
         condition: service_healthy
+    env_file:
+      - .env
     environment:
-      BOT_TOKEN: ${BOT_TOKEN}
+      CLIENT_BOT_TOKEN: ${CLIENT_BOT_TOKEN}
       DATABASE_URL: postgresql+asyncpg://booking_user:booking_pass@postgres:5432/booking_db
-      ADMIN_TELEGRAM_ID: ${ADMIN_TELEGRAM_ID}
-      BUSINESS_NAME: ${BUSINESS_NAME:-Demo Barbershop}
-      TIMEZONE: ${TIMEZONE:-Asia/Tashkent}
+    restart: unless-stopped
+
+  # ─── Business Bot ────────────────────────────────────────────
+  bot_business:
+    build: .
+    container_name: booking_business_bot
+    command: python main_business.py
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      BUSINESS_BOT_TOKEN: ${BUSINESS_BOT_TOKEN}
+      DATABASE_URL: postgresql+asyncpg://booking_user:booking_pass@postgres:5432/booking_db
     restart: unless-stopped
 
 volumes:

@@ -65,7 +65,7 @@ async def on_shutdown(bot: Bot) -> None:
 async def main() -> None:
     """Main function — configure and start the bot."""
     # Create bot instance
-    bot = Bot(token=settings.bot_token)
+    bot = Bot(token=settings.client_bot_token)
 
     # Create dispatcher with in-memory FSM storage
     # (In production, consider using Redis storage for persistence)

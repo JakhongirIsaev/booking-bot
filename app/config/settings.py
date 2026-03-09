@@ -6,16 +6,19 @@ All values are loaded from .env file or environment variables.
 """
 
 from pydantic_settings import BaseSettings
+from pydantic import Field
 
 
 class Settings(BaseSettings):
     """Application configuration."""
 
-    # Telegram bot token from @BotFather
-    bot_token: str
+    # Telegram bot token for the client-facing bot
+    client_bot_token: str = Field(alias="CLIENT_BOT_TOKEN", default="")
+    # Telegram bot token for the business-facing bot
+    business_bot_token: str = Field(alias="BUSINESS_BOT_TOKEN", default="")
 
     # PostgreSQL async connection string
-    database_url: str = "postgresql+asyncpg://booking_user:booking_pass@localhost:5432/booking_db"
+    database_url: str = Field(alias="DATABASE_URL", default="postgresql+asyncpg://postgres:postgres@localhost:5432/booking_db")
 
     # Telegram user ID of the admin / business owner
     admin_telegram_id: int = 0
